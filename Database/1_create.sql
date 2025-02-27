@@ -1,0 +1,64 @@
+﻿CREATE TABLE tblKhachHang (
+    iMaKH INT IDENTITY(1,1) PRIMARY KEY,
+    sHoTen NVARCHAR(100) NOT NULL,
+    sDiaChi NVARCHAR(255) NOT NULL,
+    sSoDienThoai VARCHAR(15) UNIQUE,
+    sEmail VARCHAR(100) UNIQUE,
+    dNgayDangKy DATE DEFAULT GETDATE()
+);
+
+-- Bảng Nhân viên
+CREATE TABLE tblNhanVien (
+    iMaNV INT IDENTITY(1,1) PRIMARY KEY,
+    sHoTen NVARCHAR(100) NOT NULL,
+    sSoDienThoai VARCHAR(15) UNIQUE NOT NULL,
+    bGioiTinh BIT DEFAULT NULL
+);
+
+CREATE TABLE tblTaiKhoan (
+    iMaTK INT IDENTITY(1,1) PRIMARY KEY,
+    sTenTaiKhoan VARCHAR(50) UNIQUE NOT NULL,
+    sMatKhau VARCHAR(255) NOT NULL, 
+    sEmail VARCHAR(50),
+    iMaNV INT NULL,
+    FOREIGN KEY (iMaNV) REFERENCES tblNhanVien(iMaNV)
+);
+
+CREATE TABLE tblChiSoNuoc (
+    iMaChiSo INT IDENTITY(1,1) PRIMARY KEY,
+    iMaKH INT NOT NULL,  
+    iMaNV INT NOT NULL,
+    dThangNam DATE NOT NULL,
+    fChiSoCu DECIMAL(10,2) NOT NULL,
+    fChiSoMoi DECIMAL(10,2) NOT NULL,
+    dNgayGhi DATE DEFAULT GETDATE(),
+    FOREIGN KEY (iMaKH) REFERENCES tblKhachHang(iMaKH) ON DELETE CASCADE,
+    FOREIGN KEY (iMaNV) REFERENCES tblNhanVien(iMaNV) ON DELETE NO ACTION
+);
+
+CREATE TABLE tblGiaNuoc (
+    iMaGiaNuoc INT IDENTITY(1,1) PRIMARY KEY,
+    dNgayApDung DATE NOT NULL,
+    fDonGia DECIMAL(10,2) NOT NULL CHECK (fDonGia > 0)
+);
+
+CREATE TABLE tblHoaDon (
+    iMaHD INT IDENTITY(1,1) PRIMARY KEY,
+    iMaChiSo INT NOT NULL, 
+    dThangNam DATE NOT NULL,
+    fSoNuocTieuThu DECIMAL(10,2) NOT NULL,
+    fThanhTien DECIMAL(15,2) NOT NULL,
+    sTrangThai BIT DEFAULT 0, -- 0: Chưa thanh toán, 1: Đã thanh toán
+    dNgayLap DATE DEFAULT GETDATE(),
+    iMaGiaNuoc INT NOT NULL,
+    FOREIGN KEY (iMaChiSo) REFERENCES tblChiSoNuoc(iMaChiSo) ON DELETE CASCADE,
+    FOREIGN KEY (iMaGiaNuoc) REFERENCES tblGiaNuoc(iMaGiaNuoc)
+);
+
+CREATE TABLE tblThanhToan (
+    iMaTT INT IDENTITY(1,1) PRIMARY KEY,
+    iMaHD INT NOT NULL,
+    dNgayThanhToan DATE NOT NULL DEFAULT GETDATE(),
+    sHinhThucTT NVARCHAR(50) NOT NULL CHECK (sHinhThucTT IN (N'Tiền mặt', N'Chuyển khoản', N'Ví điện tử')),
+    FOREIGN KEY (iMaHD) REFERENCES tblHoaDon(iMaHD) ON DELETE CASCADE
+);
